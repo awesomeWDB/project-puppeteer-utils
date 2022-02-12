@@ -20,7 +20,6 @@ $ npm stop
 ```
 
 ### npm scripts
-
 - Use `npm run lint` to check code style.
 - Use `npm test` to run unit test.
 
