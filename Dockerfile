@@ -10,7 +10,7 @@ RUN npm run build
 
 FROM node:12-alpine
 
-LABEL target="puppeteer-utils"
+LABEL puppeteer-utils=true
 
 WORKDIR /app
 

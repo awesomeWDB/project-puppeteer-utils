@@ -16,7 +16,7 @@ on:
 env:
   REGISTRY: docker.io
   IMAGE_NAME: puppeteer-utils
-  IMAGE_LABEL: target=puppeteer-utils
+  IMAGE_LABEL: puppeteer-utils=true
   RUN_PORT: 8110
 
 jobs:
