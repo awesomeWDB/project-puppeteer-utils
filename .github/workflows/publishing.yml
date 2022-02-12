@@ -57,9 +57,9 @@ jobs:
           password: ${{ secrets.HOST_PASSWORD }} # 服务器登录密码
           port: ${{ secrets.HOST_PORT }} # 服务器ssh端口
           script: |
-            sudo docker stop $(sudo docker ps --filter "${{ env.IMAGE_LABEL}}" -q)
-            sudo docker rm -f $(sudo docker ps -a --filter "${{ env.IMAGE_LABEL}}" -q)
-            sudo docker rmi -f $(sudo docker images --filter "${{ env.IMAGE_LABEL}}" -q)
+            sudo docker stop $(sudo docker ps --filter ${{ env.IMAGE_LABEL}} -q)
+            sudo docker rm -f $(sudo docker ps -a --filter ${{ env.IMAGE_LABEL}} -q)
+            sudo docker rmi -f $(sudo docker images --filter ${{ env.IMAGE_LABEL}} -q)
             sudo docker login --username=${{ secrets.DOCKER_HUB_USER }} --password ${{ secrets.DOCKER_HUB_TOKEN }} ${{ env.REGISTRY }}
             sudo docker pull ${{ secrets.DOCKER_HUB_USER }}/${{ env.IMAGE_NAME }}:latest
-            sudo docker run -d -p ${{ env.RUN_PORT }}:7001 --name ${{ env.IMAGE_NAME }}-container ${{ secrets.DOCKER_HUB_USER }}/${{ env.IMAGE_NAME }}:latest
+            sudo docker run --restart=always -d -p ${{ env.RUN_PORT }}:7001 --name ${{ env.IMAGE_NAME }}-container-prod ${{ secrets.DOCKER_HUB_USER }}/${{ env.IMAGE_NAME }}:latest
