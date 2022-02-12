@@ -1,0 +1,65 @@
+name: 构建、自动部署-正式环境
+
+# 需要配置的私密变量：
+# DOCKER_HUB_USER，docker用户
+# DOCKER_HUB_TOKEN，docker密码
+# HOST，用于远程连接的主机
+# HOST_USERNAME，远程用户名
+# HOST_PASSWORD，远程连接密码
+# HOST_PORT，远程连接端口
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  REGISTRY: docker.io
+  IMAGE_NAME: puppeteer-utils
+  IMAGE_LABEL: target=puppeteer-utils
+  RUN_PORT: 8110
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Get Time
+        id: time
+        uses: nanzm/get-time-action@v1.1
+        with:
+          timeZone: 8
+          format: 'YYYY-MM-DD-HH-mm-ss'
+      - name: 登录docker
+        run: docker login --username=${{ secrets.DOCKER_HUB_USER }} --password ${{ secrets.DOCKER_HUB_TOKEN }} ${{ env.REGISTRY }}
+      - name: 构建镜像：latest
+        run: docker build -t ${{ secrets.DOCKER_HUB_USER }}/${{ env.IMAGE_NAME }}:latest .
+      - name: 推送镜像：latest
+        run: docker push ${{ secrets.DOCKER_HUB_USER }}/${{ env.IMAGE_NAME }}:latest
+      - name: 打另一个tag：YYYY-MM-DD-HH-mm-ss
+        run: docker tag ${{ secrets.DOCKER_HUB_USER }}/${{ env.IMAGE_NAME }}:latest ${{ secrets.DOCKER_HUB_USER }}/${{ env.IMAGE_NAME }}:${{ steps.time.outputs.time }}
+      - name: 推送镜像：YYYY-MM-DD-HH-mm-ss
+        run: docker push ${{ secrets.DOCKER_HUB_USER }}/${{ env.IMAGE_NAME }}:${{ steps.time.outputs.time }}
+  run:
+    needs: [build]
+    name: pull-run-docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: connect
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }} # 服务器ip
+          username: ${{ secrets.HOST_USERNAME }} # 服务器登录用户名
+          password: ${{ secrets.HOST_PASSWORD }} # 服务器登录密码
+          port: ${{ secrets.HOST_PORT }} # 服务器ssh端口
+          script: |
+            sudo docker stop $(sudo docker ps --filter "${{ env.IMAGE_LABEL}}" -q)
+            sudo docker rm -f $(sudo docker ps -a --filter "${{ env.IMAGE_LABEL}}" -q)
+            sudo docker rmi -f $(sudo docker images --filter "${{ env.IMAGE_LABEL}}" -q)
+            sudo docker login --username=${{ secrets.DOCKER_HUB_USER }} --password ${{ secrets.DOCKER_HUB_TOKEN }} ${{ env.REGISTRY }}
+            sudo docker pull ${{ secrets.DOCKER_HUB_USER }}/${{ env.IMAGE_NAME }}:latest
+            sudo docker run -d -p ${{ env.RUN_PORT }}:7001 --name ${{ env.IMAGE_NAME }}-container ${{ secrets.DOCKER_HUB_USER }}/${{ env.IMAGE_NAME }}:latest

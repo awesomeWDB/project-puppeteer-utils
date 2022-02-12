@@ -1,0 +1,14 @@
+version: '3'
+services:
+  mongo:
+    restart: always
+    image: mongo:latest
+    container_name: mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - /docker/mongodb/data/db:/data/db # 挂载数据目录
+      - /docker/mongodb/data/log:/var/log/mongodb # 挂载日志目录
+      - /docker/mongodb/data/config:/etc/mongo # 挂载配置目录
+    environment:
+      TZ: Asia/Shanghai
