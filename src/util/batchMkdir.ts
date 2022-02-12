@@ -1,6 +1,8 @@
 import * as fs from 'fs';
+import * as os from 'os';
 
 const dirCache = {};
+const prefix = os.type() === 'Windows_NT' ? '' : '/';
 
 export const batchMkdir = (path: string) => {
   const all = path
@@ -8,8 +10,8 @@ export const batchMkdir = (path: string) => {
     .split('/')
     .map(item => item.trim())
     .filter(item => item);
-  let curr = all[0];
-  console.log(all, curr, path);
+  let curr = prefix + all[0];
+  console.log(all, curr, path, os);
   for (let i = 1; i <= all.length; i++) {
     console.log(dirCache[curr], fs.existsSync(curr), curr);
     if (!dirCache[curr] && !fs.existsSync(curr)) {
