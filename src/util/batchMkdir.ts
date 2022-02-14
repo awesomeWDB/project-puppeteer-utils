@@ -11,9 +11,9 @@ export const batchMkdir = (path: string) => {
     .map(item => item.trim())
     .filter(item => item);
   let curr = prefix + all[0];
-  console.log(all, curr, path, os);
+  // console.log(all, curr, path, os.type());
   for (let i = 1; i <= all.length; i++) {
-    console.log(dirCache[curr], fs.existsSync(curr), curr);
+    // console.log(dirCache[curr], fs.existsSync(curr), curr);
     if (!dirCache[curr] && !fs.existsSync(curr)) {
       fs.mkdirSync(curr);
     }
