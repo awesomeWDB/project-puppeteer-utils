@@ -44,7 +44,9 @@
     "build": "midway-bin build -c",
     "check": "luckyeye",
     "docker:test": "NODE_ENV=development node bootstrap.js",
-    "docker:prod": "NODE_ENV=production node bootstrap.js"
+    "docker:prod": "NODE_ENV=production node bootstrap.js",
+    "docker:build-base": "docker build -t wangdongbing/puppeteer-utils-base -f ./Dockerfile-Base .",
+    "docker:build-app": "docker build -t wangdongbing/puppeteer-utils ."
   },
   "midway-bin-clean": [
     ".vscode/.tsbuildinfo",

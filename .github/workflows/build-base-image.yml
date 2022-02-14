@@ -1,0 +1,34 @@
+name: 构建puppeteer运行的基础镜像
+
+# 需要配置的私密变量：
+# DOCKER_HUB_USER，docker用户
+# DOCKER_HUB_TOKEN，docker密码
+# HOST，用于远程连接的主机
+# HOST_USERNAME，远程用户名
+# HOST_PASSWORD，远程连接密码
+# HOST_PORT，远程连接端口
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  REGISTRY: docker.io
+  IMAGE_NAME: puppeteer-utils-base
+
+jobs:
+  build-base:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: 登录docker
+        run: docker login --username=${{ secrets.DOCKER_HUB_USER }} --password ${{ secrets.DOCKER_HUB_TOKEN }} ${{ env.REGISTRY }}
+      - name: 构建镜像：latest
+        run: docker build -t ${{ secrets.DOCKER_HUB_USER }}/${{ env.IMAGE_NAME }}:latest -f ./Dockerfile-Base .
+      - name: 推送镜像：latest
+        run: docker push ${{ secrets.DOCKER_HUB_USER }}/${{ env.IMAGE_NAME }}:latest
